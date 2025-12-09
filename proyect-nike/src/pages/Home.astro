@@ -1,11 +1,27 @@
 ---
-import Layout from "../layouts/Layout.astro"
+import Layout from "../layouts/Layout.astro";
+import nike from "../assets/nike.jpg";
 ---
 
 <Layout>
-<div class="">
-    <h1>Homeeeee jaime</h1>
-</div>
+  <section class="">
+  <!-- Imagen de fondo dentro del flujo flex -->
+  <div class="w-full h-full">
+    <img src={nike.src} alt="Zapatillas Nike" class="" />
+  </div>
+  <!-- Contenido centrado sobre la imagen -->
+  <div>
+    <h1>
+      Eleva tu Juego con Nike
+    </h1>
+    <p>
+      Descubre la nueva colección y domina cada paso con estilo y comodidad.
+    </p>
+    <a>
+      Comprar Ahora
+    </a>
+  </div>
+
+</section>
+
 </Layout>
-
-
