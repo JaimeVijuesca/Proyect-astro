@@ -4,24 +4,34 @@ import nike from "../assets/nike.jpg";
 ---
 
 <Layout>
-  <section class="">
-  <!-- Imagen de fondo dentro del flujo flex -->
-  <div class="w-full h-full">
-    <img src={nike.src} alt="Zapatillas Nike" class="" />
-  </div>
-  <!-- Contenido centrado sobre la imagen -->
-  <div>
-    <h1>
-      Eleva tu Juego con Nike
-    </h1>
-    <p>
-      Descubre la nueva colección y domina cada paso con estilo y comodidad.
-    </p>
-    <a>
-      Comprar Ahora
-    </a>
-  </div>
+  <section
+    class="relative flex items-center justify-center h-screen overflow-hidden"
+  >
+    <!-- Imagen de fondo con filtro -->
+    <div
+      class="absolute inset-0 bg-center bg-cover"
+      style={`background-image: url(${nike.src}); filter: brightness(0.6);`}
+    >
+    </div>
 
-</section>
-
+    <!-- Contenido centrado -->
+    <div
+      class="relative z-10 flex flex-col items-center text-center px-4 md:px-0"
+    >
+      <h1
+        class="text-white text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight"
+      >
+        Eleva tu Juego con Nike
+      </h1>
+      <p class="text-white text-lg md:text-xl mt-4 mb-8 max-w-xl">
+        Descubre la nueva colección y domina cada paso con estilo y comodidad.
+      </p>
+      <a
+        href="#"
+        class="px-6 py-3 bg-white text-black font-semibold rounded-full shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl"
+      >
+        Comprar Ahora
+      </a>
+    </div>
+  </section>
 </Layout>

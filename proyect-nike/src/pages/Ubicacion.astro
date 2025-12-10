@@ -1,0 +1,44 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <div id="map"></div>
+
+  <style>
+    #map {
+      width: 100%;
+      height: 90vh;
+    }
+  </style>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <!-- Cargar Leaflet JS solo en el navegador -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    client:load
+  ></script>
+
+  <!-- Inicialización del mapa (se ejecuta cuando el JS ya está cargado) -->
+  <script client:load>
+    // Esperar a que el DOM esté listo (extra seguro)
+    document.addEventListener("DOMContentLoaded", () => {
+      const map = L.map("map").setView([41.6488, -0.8891], 13);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "© OpenStreetMap"
+      }).addTo(map);
+
+      L.marker([41.6488, -0.8891])
+        .addTo(map)
+        .bindPopup("Zaragoza")
+        .openPopup();
+    });
+  </script>
+</Layout>
