@@ -10,6 +10,7 @@ import Layout from "../layouts/Layout.astro";
   <script type="module">
     if (window.location.pathname === "/") {
       window.history.replaceState(null, "", "/Home");
+      window.location.reload();
     }
   </script>
   <Welcome />
