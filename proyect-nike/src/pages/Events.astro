@@ -1,0 +1,11 @@
+---
+import Layout from "../layouts/Layout.astro"
+import { tickets } from "../data/tickets.js"
+import EventIsla  from "../pages/EventIsla.jsx"
+
+
+---
+<Layout>
+<h1 class="text-purple-800 font-bold flex   ">Events Nike</h1>
+<EventIsla tickets={tickets} client:load />
+</Layout>
