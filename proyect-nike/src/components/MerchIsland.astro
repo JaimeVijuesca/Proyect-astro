@@ -1,0 +1,120 @@
+---
+import { merch } from "../data/merch.js";
+import CarritoIcon from "../assets/carrito.png";
+import Carrito from "../components/Carrito.astro";
+---
+
+<div class="py-8 px-4 md:px-16">
+  <!-- Icono carrito -->
+  <img
+    src={CarritoIcon.src}
+    alt="Carrito"
+    id="toggle-carrito"
+    class="w-12 h-12 cursor-pointer object-contain"
+  />
+
+  <!-- Carrito -->
+  <Carrito />
+
+  <h1
+    class="text-6xl font-extrabold uppercase text-black text-center py-8 tracking-tight"
+  >
+    Merch Nike
+  </h1>
+
+  <!-- Productos -->
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
+  >
+    {
+      merch.map((product) => (
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden flex flex-col">
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            class="w-full h-64 object-cover"
+          />
+          <div class="p-4 flex flex-col flex-1">
+            <h2 class="font-bold text-xl mb-2">{product.name}</h2>
+            <p class="text-gray-600 mb-2">{product.category}</p>
+            <p class="text-gray-600 mb-2">{product.stock} unidades en stock</p>
+            <p class="font-semibold text-lg mb-4">
+              ${product.price.toFixed(2)}
+            </p>
+
+            <button
+              class="mt-auto bg-black text-white font-bold py-2 px-4 rounded comprar-btn"
+              data-name={product.name}
+              data-price={product.price}
+              type="button"
+            >
+              Comprar
+            </button>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  const toggle = document.getElementById("toggle-carrito");
+  const carritoEl = document.getElementById("carrito");
+
+  // ===== Renderizar carrito =====
+  function renderCarrito() {
+    const lista = document.getElementById("carrito-lista");
+    const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+    lista.innerHTML = "";
+
+    if (carrito.length === 0) {
+      lista.innerHTML = `<li class="text-gray-500">Carrito vacío</li>`;
+      return;
+    }
+
+    carrito.forEach((producto) => {
+      const li = document.createElement("li");
+      li.className = "flex justify-between text-sm";
+
+      li.innerHTML = `
+        <span>${producto.name}</span>
+        <span>$${producto.price}</span>
+      `;
+
+      lista.appendChild(li);
+    });
+  }
+
+  // ===== Mostrar / ocultar carrito =====
+  toggle.addEventListener("click", () => {
+    carritoEl.classList.toggle("hidden");
+
+    if (!carritoEl.classList.contains("hidden")) {
+      renderCarrito();
+    }
+  });
+
+  // ===== Comprar producto =====
+  document.querySelectorAll(".comprar-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const producto = {
+        name: btn.dataset.name,
+        price: Number(btn.dataset.price),
+      };
+
+      let carrito = JSON.parse(localStorage.getItem("carrito"));
+
+      // Asegurar array
+      if (!Array.isArray(carrito)) {
+        carrito = [];
+      }
+
+      carrito.push(producto);
+
+      localStorage.setItem("carrito", JSON.stringify(carrito));
+
+      renderCarrito();
+    });
+  });
+</script>
