@@ -1,0 +1,233 @@
+---
+import { merch } from "../data/merch.js";
+import CarritoIcon from "../assets/carrito.png";
+import Carrito from "../components/Carrito.astro";
+---
+
+<div class="py-8 px-4 md:px-16">
+  <!-- Icono carrito -->
+  <img
+    src={CarritoIcon.src}
+    alt="Carrito"
+    id="toggle-carrito"
+    class="w-12 h-12 cursor-pointer object-contain"
+  />
+
+  <!-- Componente Carrito -->
+  <Carrito />
+
+  <h1
+    class="text-6xl font-extrabold uppercase text-black text-center py-8 tracking-tight"
+  >
+    Merch Nike
+  </h1>
+
+  <!-- Productos -->
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
+  >
+    {
+      merch.map((product) => (
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden flex flex-col nike-merch">
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            class="w-full h-64 object-cover"
+          />
+          <div class="p-4 flex flex-col flex-1">
+            <h2 class="font-bold text-xl mb-2">{product.name}</h2>
+            <p class="text-gray-600 mb-2">{product.category}</p>
+            <p class="text-gray-600 mb-2">
+              {product.stock === 0 ? "Sold Out" : `${product.stock} spots left`}
+            </p>
+            <p class="font-semibold text-lg mb-4">
+              ${product.price.toFixed(2)}
+            </p>
+
+            <button
+              class="mt-auto bg-black text-white font-bold py-2 px-4 rounded comprar-btn"
+              data-name={product.name}
+              data-price={product.price}
+              data-stock={product.stock}
+              data-img={product.imageUrl}
+              disabled={product.stock === 0}
+              type="button"
+            >
+              Comprar
+            </button>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+
+
+<script>
+
+  import gsap from "gsap";
+  gsap.to(".nike-merch", { 
+  duration: 3,
+  backgroundColor: '#9d95ff',
+});
+
+
+  // ===== Variables =====
+  const toggle = document.getElementById("toggle-carrito");
+  const carritoEl = document.getElementById("carrito");
+  const lista = document.getElementById("carrito-lista");
+
+  // ===== Helpers =====
+  const getCarrito = () => JSON.parse(localStorage.getItem("carrito")) || [];
+  const setCarrito = (carrito) =>
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+
+  // ===== Guardar referencias del stock de cada producto en el DOM =====
+  const stockElements = {};
+  document.querySelectorAll(".comprar-btn").forEach((btn) => {
+    stockElements[btn.dataset.name] = btn
+      .closest("div.flex-1, div.p-4")
+      .querySelector("p:nth-child(3)");
+  });
+
+  // ===== Funciones =====
+  const actualizarStockHTML = (producto) => {
+    const stockEl = stockElements[producto.name];
+    if (!stockEl) return;
+    stockEl.textContent =
+      producto.stock === 0 ? "Sold Out" : `${producto.stock} spots left`;
+  };
+
+  const agregarProducto = (producto, cantidad = 1) => {
+    const carrito = getCarrito();
+    const index = carrito.findIndex((item) => item.name === producto.name);
+
+    if (index !== -1) {
+      const item = carrito[index];
+      if (item.stock < cantidad) return alert("No hay stock disponible");
+      item.cantidad += cantidad;
+      item.stock -= cantidad;
+      item.priceTotal = item.cantidad * item.priceUnit;
+    } else {
+      if (producto.stock < cantidad) return alert("No hay suficiente stock");
+      carrito.push({
+        name: producto.name,
+        cantidad,
+        stock: producto.stock - cantidad,
+        priceUnit: producto.price,
+        priceTotal: producto.price * cantidad,
+        imageUrl: producto.imageUrl,
+      });
+    }
+
+    setCarrito(carrito);
+    renderCarrito();
+    actualizarStockHTML(carrito.find((p) => p.name === producto.name));
+  };
+
+  const actualizarProducto = (index, tipo) => {
+    const carrito = getCarrito();
+    const item = carrito[index];
+
+    switch (tipo) {
+      case "sumar":
+        if (item.stock > 0) {
+          item.cantidad++;
+          item.stock--;
+          item.priceTotal = item.cantidad * item.priceUnit;
+        } else return alert("No hay más stock disponible");
+        break;
+      case "restar":
+        if (item.cantidad > 1) {
+          item.cantidad--;
+          item.stock++;
+          item.priceTotal = item.cantidad * item.priceUnit;
+        }
+        break;
+      case "eliminar":
+        item.stock += item.cantidad; // Recuperamos el stock al eliminar
+        carrito.splice(index, 1);
+        break;
+    }
+
+    setCarrito(carrito);
+    renderCarrito();
+
+    // Actualizar stock en HTML
+    carrito.forEach(actualizarStockHTML);
+  };
+
+  const renderCarrito = () => {
+    const carrito = getCarrito();
+    lista.innerHTML = "";
+
+    if (carrito.length === 0) {
+      lista.innerHTML = `<li class="text-gray-500">Carrito vacío</li>`;
+      return;
+    }
+
+    carrito.forEach((producto, index) => {
+      const li = document.createElement("li");
+      li.className =
+        "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b text-sm";
+
+      li.dataset.index = index;
+
+      li.innerHTML = `
+        <div class="flex-1">
+          <p class="font-semibold text-gray-800">${producto.name}</p>
+          <p class="text-gray-500 text-xs">
+            $${producto.priceUnit} c/u · Stock: ${producto.stock}
+          </p>
+        </div>
+        <img class="w-12 h-12 object-cover" src="${producto.imageUrl}" />
+        <div class="flex items-center gap-2">
+          <button class="w-7 h-7 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 btn-restar">−</button>
+          <span class="min-w-[20px] text-center font-medium">${producto.cantidad}</span>
+          <button class="w-7 h-7 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 btn-sumar">+</button>
+        </div>
+        <div class="w-20 text-right font-semibold">
+          <h1>Precio total:</h1>
+          $${producto.priceTotal.toFixed(2)}
+        </div>
+        <button class="text-red-500 hover:text-red-700 font-semibold btn-eliminar">✕</button>
+        <button class="text-green-500 hover:text-green-700 font-semibold btn-comprar"> Comprar </button>
+      `;
+
+      if (producto.stock === 0)
+        li.innerHTML += `<span class="text-red-500">Agotado</span>`;
+      lista.appendChild(li);
+    });
+  };
+
+  // ===== Eventos =====
+  toggle.addEventListener("click", () => {
+    carritoEl.classList.toggle("hidden");
+    if (!carritoEl.classList.contains("hidden")) renderCarrito();
+  });
+
+  lista.addEventListener("click", (e) => {
+    const li = e.target.closest("li");
+    if (!li) return;
+    const index = Number(li.dataset.index);
+
+    if (e.target.classList.contains("btn-sumar"))
+      actualizarProducto(index, "sumar");
+    if (e.target.classList.contains("btn-restar"))
+      actualizarProducto(index, "restar");
+    if (e.target.classList.contains("btn-eliminar"))
+      actualizarProducto(index, "eliminar");
+  });
+
+  document.querySelectorAll(".comprar-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      agregarProducto({
+        name: btn.dataset.name,
+        price: Number(btn.dataset.price),
+        stock: Number(btn.dataset.stock),
+        imageUrl: btn.dataset.img,
+      });
+    });
+  });
+</script>

@@ -1,0 +1,36 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<script>
+  let user = document.getElementById("users");
+
+  fetch("https://randomuser.me/api/?results=6")
+    .then((response) => response.json())
+    .then((data) => {
+      let users = data.results;
+
+      for (let index = 0; index < users.length; index++) {
+        user.innerHTML += `
+          <div class="bg-black rounded-lg shadow-lg p-4 flex flex-col items-center text-center transition-transform transform hover:scale-105">
+            <img class="rounded-full mb-4 w-24 h-24 object-cover" src="${users[index].picture.large}" alt="${users[index].name.first} ${users[index].name.last}">
+            <h1 class="text-xl text-white font-bold mb-1">${users[index].name.first} ${users[index].name.last}</h1>
+            <p class="text-white text-sm">${users[index].email}</p>
+          </div>
+        `;
+      }
+    });
+</script>
+
+<Layout>
+  <h1
+      class="flex font-black text-6xl tracking-[-0.05em] text-black uppercase justify-center p-4"
+    >
+      Users
+    </h1>
+  <div
+    id="users"
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6 bg-gray-100"
+  >
+  </div>
+</Layout>

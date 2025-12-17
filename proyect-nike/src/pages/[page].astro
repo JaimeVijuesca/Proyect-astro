@@ -1,0 +1,22 @@
+---
+export function getStaticPaths() {
+  const pages = [
+    "Home",
+    "Events",
+    "Merch",
+    "Dashboard",
+    "Comunidad",
+    "Ubicacion",
+    "About",
+    "Contacts",
+  ];
+
+  return pages.map((page) => ({
+    params: { page },
+  }));
+}
+
+const { page } = Astro.params;
+---
+
+<h1>Página: {page}</h1>

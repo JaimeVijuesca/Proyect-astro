@@ -1,0 +1,56 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <h1 class="text-3xl font-bold tracking-tight uppercase mb-4 p-4 text-center">
+    Dashboard · Admin Panel
+  </h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div
+      class="rounded-2xl bg-gradient-to-br from-neutral-900 to-neutral-800 p-6 shadow-lg"
+    >
+      <p class="text-sm uppercase text-neutral-400">Entradas vendidas hoy</p>
+      <p class="mt-2 text-4xl font-extrabold text-white">128</p>
+    </div>
+
+    <div
+      class="rounded-2xl bg-gradient-to-br from-neutral-900 to-neutral-800 p-6 shadow-lg"
+    >
+      <p class="text-sm uppercase text-neutral-400">Ingresos totales</p>
+      <p class="mt-2 text-4xl font-extrabold text-white">€3.450</p>
+    </div>
+
+    <div
+      class="rounded-2xl bg-gradient-to-br from-neutral-900 to-neutral-800 p-6 shadow-lg"
+    >
+      <p class="text-sm uppercase text-neutral-400">Usuarios activos</p>
+      <p class="mt-2 text-4xl font-extrabold text-white">87</p>
+    </div>
+  </div>
+
+  <div class="rounded-2xl bg-neutral-900 shadow-lg p-6">
+    <p class="text-sm uppercase tracking-widest text-neutral-400 mb-4">
+      Ventas de la semana
+    </p>
+    <div class="flex items-end space-x-2 h-48">
+      <div class="w-8 bg-green-500" style="height:20%"></div>
+      <div class="w-8 bg-green-500" style="height:35%"></div>
+      <div class="w-8 bg-green-500" style="height:40%"></div>
+      <div class="w-8 bg-green-500" style="height:30%"></div>
+      <div class="w-8 bg-green-500" style="height:55%"></div>
+      <div class="w-8 bg-green-500" style="height:70%"></div>
+      <div class="w-8 bg-green-500" style="height:60%"></div>
+    </div>
+    <div class="flex justify-between text-xs text-neutral-400 mt-2">
+      <span>Lun</span>
+      <span>Mar</span>
+      <span>Mié</span>
+      <span>Jue</span>
+      <span>Vie</span>
+      <span>Sáb</span>
+      <span>Dom</span>
+    </div>
+  </div>
+</Layout>
