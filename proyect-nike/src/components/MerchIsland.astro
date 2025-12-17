@@ -28,7 +28,7 @@ import Carrito from "../components/Carrito.astro";
   >
     {
       merch.map((product) => (
-        <div class="bg-white shadow-lg rounded-xl overflow-hidden flex flex-col">
+        <div class="bg-white shadow-lg rounded-xl overflow-hidden flex flex-col nike-merch">
           <img
             src={product.imageUrl}
             alt={product.name}
@@ -62,7 +62,18 @@ import Carrito from "../components/Carrito.astro";
   </div>
 </div>
 
+
+
 <script>
+
+  import gsap from "gsap";
+  gsap.to(".nike-merch", { 
+  duration: 3,
+  backgroundColor: '#9d95ff',
+});
+
+
+  // ===== Variables =====
   const toggle = document.getElementById("toggle-carrito");
   const carritoEl = document.getElementById("carrito");
   const lista = document.getElementById("carrito-lista");
