@@ -13,7 +13,7 @@ import Carrito from "../components/Carrito.astro";
     class="w-12 h-12 cursor-pointer object-contain"
   />
 
-  <!-- Carrito -->
+  <!-- Componente Carrito -->
   <Carrito />
 
   <h1
@@ -37,7 +37,9 @@ import Carrito from "../components/Carrito.astro";
           <div class="p-4 flex flex-col flex-1">
             <h2 class="font-bold text-xl mb-2">{product.name}</h2>
             <p class="text-gray-600 mb-2">{product.category}</p>
-            <p class="text-gray-600 mb-2">{product.stock} unidades en stock</p>
+            <p class="text-gray-600 mb-2">
+              {product.stock === 0 ? "Sold Out" : `${product.stock} spots left`}
+            </p>
             <p class="font-semibold text-lg mb-4">
               ${product.price.toFixed(2)}
             </p>
@@ -46,6 +48,9 @@ import Carrito from "../components/Carrito.astro";
               class="mt-auto bg-black text-white font-bold py-2 px-4 rounded comprar-btn"
               data-name={product.name}
               data-price={product.price}
+              data-stock={product.stock}
+              data-img={product.imageUrl}
+              disabled={product.stock === 0}
               type="button"
             >
               Comprar
@@ -60,12 +65,90 @@ import Carrito from "../components/Carrito.astro";
 <script>
   const toggle = document.getElementById("toggle-carrito");
   const carritoEl = document.getElementById("carrito");
+  const lista = document.getElementById("carrito-lista");
 
-  // ===== Renderizar carrito =====
-  function renderCarrito() {
-    const lista = document.getElementById("carrito-lista");
-    const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+  // ===== Helpers =====
+  const getCarrito = () => JSON.parse(localStorage.getItem("carrito")) || [];
+  const setCarrito = (carrito) =>
+    localStorage.setItem("carrito", JSON.stringify(carrito));
 
+  // ===== Guardar referencias del stock de cada producto en el DOM =====
+  const stockElements = {};
+  document.querySelectorAll(".comprar-btn").forEach((btn) => {
+    stockElements[btn.dataset.name] = btn
+      .closest("div.flex-1, div.p-4")
+      .querySelector("p:nth-child(3)");
+  });
+
+  // ===== Funciones =====
+  const actualizarStockHTML = (producto) => {
+    const stockEl = stockElements[producto.name];
+    if (!stockEl) return;
+    stockEl.textContent =
+      producto.stock === 0 ? "Sold Out" : `${producto.stock} spots left`;
+  };
+
+  const agregarProducto = (producto, cantidad = 1) => {
+    const carrito = getCarrito();
+    const index = carrito.findIndex((item) => item.name === producto.name);
+
+    if (index !== -1) {
+      const item = carrito[index];
+      if (item.stock < cantidad) return alert("No hay stock disponible");
+      item.cantidad += cantidad;
+      item.stock -= cantidad;
+      item.priceTotal = item.cantidad * item.priceUnit;
+    } else {
+      if (producto.stock < cantidad) return alert("No hay suficiente stock");
+      carrito.push({
+        name: producto.name,
+        cantidad,
+        stock: producto.stock - cantidad,
+        priceUnit: producto.price,
+        priceTotal: producto.price * cantidad,
+        imageUrl: producto.imageUrl,
+      });
+    }
+
+    setCarrito(carrito);
+    renderCarrito();
+    actualizarStockHTML(carrito.find((p) => p.name === producto.name));
+  };
+
+  const actualizarProducto = (index, tipo) => {
+    const carrito = getCarrito();
+    const item = carrito[index];
+
+    switch (tipo) {
+      case "sumar":
+        if (item.stock > 0) {
+          item.cantidad++;
+          item.stock--;
+          item.priceTotal = item.cantidad * item.priceUnit;
+        } else return alert("No hay más stock disponible");
+        break;
+      case "restar":
+        if (item.cantidad > 1) {
+          item.cantidad--;
+          item.stock++;
+          item.priceTotal = item.cantidad * item.priceUnit;
+        }
+        break;
+      case "eliminar":
+        item.stock += item.cantidad; // Recuperamos el stock al eliminar
+        carrito.splice(index, 1);
+        break;
+    }
+
+    setCarrito(carrito);
+    renderCarrito();
+
+    // Actualizar stock en HTML
+    carrito.forEach(actualizarStockHTML);
+  };
+
+  const renderCarrito = () => {
+    const carrito = getCarrito();
     lista.innerHTML = "";
 
     if (carrito.length === 0) {
@@ -73,48 +156,67 @@ import Carrito from "../components/Carrito.astro";
       return;
     }
 
-    carrito.forEach((producto) => {
+    carrito.forEach((producto, index) => {
       const li = document.createElement("li");
-      li.className = "flex justify-between text-sm";
+      li.className =
+        "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b text-sm";
+
+      li.dataset.index = index;
 
       li.innerHTML = `
-        <span>${producto.name}</span>
-        <span>$${producto.price}</span>
+        <div class="flex-1">
+          <p class="font-semibold text-gray-800">${producto.name}</p>
+          <p class="text-gray-500 text-xs">
+            $${producto.priceUnit} c/u · Stock: ${producto.stock}
+          </p>
+        </div>
+        <img class="w-12 h-12 object-cover" src="${producto.imageUrl}" />
+        <div class="flex items-center gap-2">
+          <button class="w-7 h-7 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 btn-restar">−</button>
+          <span class="min-w-[20px] text-center font-medium">${producto.cantidad}</span>
+          <button class="w-7 h-7 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 btn-sumar">+</button>
+        </div>
+        <div class="w-20 text-right font-semibold">
+          <h1>Precio total:</h1>
+          $${producto.priceTotal.toFixed(2)}
+        </div>
+        <button class="text-red-500 hover:text-red-700 font-semibold btn-eliminar">✕</button>
+        <button class="text-green-500 hover:text-green-700 font-semibold btn-comprar"> Comprar </button>
       `;
 
+      if (producto.stock === 0)
+        li.innerHTML += `<span class="text-red-500">Agotado</span>`;
       lista.appendChild(li);
     });
-  }
+  };
 
-  // ===== Mostrar / ocultar carrito =====
+  // ===== Eventos =====
   toggle.addEventListener("click", () => {
     carritoEl.classList.toggle("hidden");
-
-    if (!carritoEl.classList.contains("hidden")) {
-      renderCarrito();
-    }
+    if (!carritoEl.classList.contains("hidden")) renderCarrito();
   });
 
-  // ===== Comprar producto =====
+  lista.addEventListener("click", (e) => {
+    const li = e.target.closest("li");
+    if (!li) return;
+    const index = Number(li.dataset.index);
+
+    if (e.target.classList.contains("btn-sumar"))
+      actualizarProducto(index, "sumar");
+    if (e.target.classList.contains("btn-restar"))
+      actualizarProducto(index, "restar");
+    if (e.target.classList.contains("btn-eliminar"))
+      actualizarProducto(index, "eliminar");
+  });
+
   document.querySelectorAll(".comprar-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const producto = {
+      agregarProducto({
         name: btn.dataset.name,
         price: Number(btn.dataset.price),
-      };
-
-      let carrito = JSON.parse(localStorage.getItem("carrito"));
-
-      // Asegurar array
-      if (!Array.isArray(carrito)) {
-        carrito = [];
-      }
-
-      carrito.push(producto);
-
-      localStorage.setItem("carrito", JSON.stringify(carrito));
-
-      renderCarrito();
+        stock: Number(btn.dataset.stock),
+        imageUrl: btn.dataset.img,
+      });
     });
   });
 </script>
